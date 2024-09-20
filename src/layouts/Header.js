@@ -82,7 +82,7 @@ function Header() {
       expand="lg"
       container={false}
       className={
-        "header-navbar navbar align-items-center floating-nav container-xxl navbar-shadow navbar navbar-expand-lg navbar-light"
+        "header-navbar navbar align-items-center floating-nav .container-fluid navbar-shadow navbar navbar-expand-lg navbar-light"
       }
     >
       <div className="navbar-container d-flex content">
