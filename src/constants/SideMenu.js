@@ -22,6 +22,25 @@ export const sideMenu = [
   },
 
   {
+    label: "Users",
+    icon: <UserPlus/>,
+    children: [
+      {
+        label: "Manage Users",
+        to: "/user-list", 
+      },
+      {
+        label: "Permissons",
+        to: "/user-permission",  
+      },
+      {
+        label:"Linked Accounts",
+        to:"/user-linked-accounts"
+      }
+    ],
+  },
+
+  {
     label: "Products",
     icon: <Layers />,
     children: [

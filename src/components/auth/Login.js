@@ -41,7 +41,7 @@ function Login() {
 
   useEffect(() => {
     if (userToken) {
-      navigate("/vendor-list");
+      navigate("/client-list");
     }
   }, [userToken]);
 
@@ -60,7 +60,7 @@ function Login() {
       dispatch(setUserToken(loginRes?.data?.data?.token));
       dispatch(setUserInfo(loginRes?.data?.data));
       setErrorMessage("");
-      navigate("/vendor-list");
+      navigate("/client-list");
     } else if (loginRes?.isError) {
       setErrorMessage(loginRes?.error?.data?.message || "Something went wrong");
     }

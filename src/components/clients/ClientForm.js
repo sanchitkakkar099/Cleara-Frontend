@@ -41,6 +41,8 @@ function ClientForm() {
   const [selectedDate, setSelectedDate] = useState("");
   const [adressCheck, setAdressCheck] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
+  const [selectedsubstituion,setSelectedsubstituion] = useState(false);
+  const [disProductInstruction,setDisProductInstruction] = useState(false);
   const countries = [
     { name: "United States", code: "US" },
     { name: "Canada", code: "CA" },
@@ -52,10 +54,6 @@ function ClientForm() {
   const Affiliated = [
     { label: "Yes", value: "Yes" },
     { label: "No", value: "No" },
-    { label: "No", value: "No" },
-    { label: "No", value: "No" },
-    { label: "No", value: "No" },
-
   ];
   const {
     control,
@@ -68,29 +66,40 @@ function ClientForm() {
     setError,
   } = useForm();
 
-  if(adressCheck){
-    const fields = ["street", "addressLine2", "zip", "city", "state", "country"];
+  if (adressCheck) {
+    const fields = [
+      "street",
+      "addressLine2",
+      "zip",
+      "city",
+      "state",
+      "country",
+    ];
     fields.forEach((field) => {
       setValue(`billing_address.${field}`, watch(`physical_address.${field}`));
-    }); 
+    });
   }
 
   const handleCategoryChange = async (selectedOption) => {};
 
-  const onSubmit = async (state) => {
-    console.log("state Data", state);
-
-  };
 
   const handleSameAsPhysical = (e) => {
     setAdressCheck(e.target.checked);
-    const fields = ["street", "addressLine2", "zip", "city", "state", "country"];
+    const fields = [
+      "street",
+      "addressLine2",
+      "zip",
+      "city",
+      "state",
+      "country",
+    ];
     fields.forEach((field) => {
-      const physicalValue = e.target.checked ? getValues(`physical_address.${field}`) : '';
+      const physicalValue = e.target.checked
+        ? getValues(`physical_address.${field}`)
+        : "";
       setValue(`billing_address.${field}`, physicalValue);
-    }); 
-  }
-
+    });
+  };
 
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
@@ -100,9 +109,52 @@ function ClientForm() {
     setSelectedOption(event.target.value);
   };
 
+  const handlesubschange = () => {
+    setSelectedsubstituion(!selectedsubstituion);
+  }
+
+  const handledisplay = () => {
+    setDisProductInstruction(!disProductInstruction);
+  }
+  console.log("disProductInstruction",disProductInstruction);
+
+  useEffect(() => {
+    if (resCreateClient?.isSuccess) {
+      toast.success(resCreateClient?.data?.message, {
+        position: "top-center",
+        duration: 3000,
+      });
+      navigate("/user-list");
+    }
+  }, [resCreateClient?.isSuccess]);
+
+
+  const onSubmit = async (state) => {
+    console.log("selectedoptions",selectedOption);
+    console.log("state Data", state);
+    console.log("selectedsubstituion",selectedsubstituion);
+    console.log("disProductInstruction",disProductInstruction);
+
+    const productSectionData = state?.productSection?.blocks.map((block) =>block.text).join(' ');
+    console.log("productSectionData", productSectionData);
+    
+    const payload = {
+      ...state,
+      accountstatus : selectedOption,
+      substitute: selectedsubstituion,
+      displayProductSection:disProductInstruction,
+      productSection:productSectionData,
+    }
+   reqCreateClient(payload);
+  };
   return (
     <div>
       <Card>
+      <div style={{backgroundColor:"#7367f0"}}>
+      <CardHeader style={{color:"white"}}>
+      <CardTitle tag="h4">General</CardTitle>
+      </CardHeader>
+      </div>
         <CardBody>
           <Form onSubmit={handleSubmit(onSubmit)}>
             <Row>
@@ -131,110 +183,113 @@ function ClientForm() {
                   )}
                 </Col>
                 <Col md="12" className="mb-1">
-                <Label className="form-label" for="pcompany">
-                  Parent Company
-                </Label>
-                <Controller
-                  id="parentCompany"
-                  name="parentCompany"
-                  control={control}
-                  // rules={{ required: "Parent company is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="text"
-                      placeholder="Parent Company"
-                      {...field}
-                    />
-                  )}
-                />
-                {errors?.parentCompany && (
-                  <FormFeedback>{errors?.parentCompany?.message}</FormFeedback>
-                )}
-                </Col>
-                <Col md="12" sm="12" className="mb-1">
-                <Label className="form-label" for="Inqname">
-                  Inquiry Name<span style={{ color: "red" }}>*</span>
-                </Label>
-                <Controller
-                  id="inquiryName"
-                  name="inquiryName"
-                  control={control}
-                  rules={{ required: "Inquiry name is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="text"
-                      placeholder="Parent Company"
-                      {...field}
-                    />
-                  )}
-                />
-                {errors?.inquiryName && (
-                  <FormFeedback>{errors?.inquiryName?.message}</FormFeedback>
-                )}
-                </Col>
-                <Col md="12" sm="12" className="mb-1">
-                <FormGroup check inline>
+                  <Label className="form-label" for="pcompany">
+                    Parent Company
+                  </Label>
                   <Controller
-                    id="substitute"
-                    name="substitute"
+                    id="parentCompany"
+                    name="parentCompany"
+                    control={control}
+                    // rules={{ required: "Parent company is required" }}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder="Parent Company"
+                        {...field}
+                      />
+                    )}
+                  />
+                  {errors?.parentCompany && (
+                    <FormFeedback>
+                      {errors?.parentCompany?.message}
+                    </FormFeedback>
+                  )}
+                </Col>
+                <Col md="12" sm="12" className="mb-1">
+                  <Label className="form-label" for="Inqname">
+                    Inquiry Name<span style={{ color: "red" }}>*</span>
+                  </Label>
+                  <Controller
+                    id="inquiryName"
+                    name="inquiryName"
+                    control={control}
+                    rules={{ required: "Inquiry name is required" }}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder="Parent Company"
+                        {...field}
+                      />
+                    )}
+                  />
+                  {errors?.inquiryName && (
+                    <FormFeedback>{errors?.inquiryName?.message}</FormFeedback>
+                  )}
+                </Col>
+                <Col md="12" sm="12" className="mb-1">
+                  <FormGroup check inline>
+                    <Controller
+                      id="substitute"
+                      name="substitute"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          type="checkbox"
+                          defaultValue={false}
+                          {...field}
+                          onChange={handlesubschange}
+                        />
+                      )}
+                    />
+                    {errors?.substitute && (
+                      <FormFeedback>{errors?.substitute?.message}</FormFeedback>
+                    )}
+                    <Label check>Substitute End User</Label>
+                    <h6>
+                      Note that enabling this option will require a value be
+                      entered at order time.
+                    </h6>
+                  </FormGroup>
+                </Col>
+                <Col md="12" sm="12" className="mb-1">
+                  <Label className="form-label" for="clientCode">
+                    Client Code<span style={{ color: "red" }}>*</span>
+                  </Label>
+                  <Controller
+                    id="clientCode"
+                    name="clientCode"
                     control={control}
                     rules={{ required: "Client Code is required" }}
                     render={({ field }) => (
-                    <Input type="checkbox"
-                    {...field} 
-                    /> 
+                      <Input type="text" placeholder="Client Code" {...field} />
                     )}
                   />
-                  <Label check>Substitute End User</Label>
-                  <h6>
-                    Note that enabling this option will require a value be
-                    entered at order time.
-                  </h6>
-                </FormGroup>
-                </Col>
-                <Col md="12" sm="12" className="mb-1">
-                <Label className="form-label" for="clintCode">
-                  Client Code<span style={{ color: "red" }}>*</span>
-                </Label>
-                <Controller
-                  id="clintCode"
-                  name="clintCode"
-                  control={control}
-                  rules={{ required: "Client Code is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="text"
-                      placeholder="Client Code"
-                      {...field}
-                    />
+                  {errors?.clientCode && (
+                    <FormFeedback>{errors?.clientCode?.message}</FormFeedback>
                   )}
-                />
-                {errors?.clintCode && (
-                  <FormFeedback>{errors?.clintCode?.message}</FormFeedback>
-                )}
                 </Col>
                 <Col md="12" sm="12" className="mb-1">
                   <Label for="datePicker">
-                    Select a Date<span style={{ color: "red" }}>*</span>
+                    Date Created<span style={{ color: "red" }}>*</span>
                   </Label>
                   <Controller
-                    id="date"
-                    name="date"
+                    id="datecreated"
+                    name="datecreated"
                     control={control}
-                    rules={{ required: "Date is required" }}
+                    rules={{ required: "select created data" }}
                     render={({ field }) => (
-                    <Input
-                      type="date"
-                      name="date"
-                      id="datePicker"
-                      value={selectedDate}
-                      onChange={handleDateChange}
-                      {...field}
-                    />  
+                      <Input
+                        type="date"
+                        name="datecreated"
+                        id="datePicker"
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        {...field}
+                      />
                     )}
                   />
-                  {errors?.date && (
-                    <FormFeedback>{errors?.date?.message}</FormFeedback>
+                  {errors?.datecreated && (
+                    <FormFeedback>{errors?.datecreated?.message}</FormFeedback>
                   )}
                 </Col>
                 <Col md="12">
@@ -245,12 +300,13 @@ function ClientForm() {
                     control={control}
                     render={({ field }) => (
                       <Input
-                      type="textarea"
-                      name="text"
-                      id="exampleText"
-                      placeholder="Enter your text here"
-                      rows="5"
-                    />  
+                        type="textarea"
+                        name="clientNote"
+                        id="clientNote"
+                        placeholder="Enter your text here"
+                        rows="5"
+                        {...field}
+                      />
                     )}
                   />
                   {errors?.clientNote && (
@@ -263,26 +319,26 @@ function ClientForm() {
               <Col md="6" className="mb-1">
                 <div className="h4 mb-2">Contact Information</div>
                 <Col md="12" className="mb-1">
-                <Label className="form-label" for="name">
-                  Name<span style={{ color: "red" }}>*</span>
-                </Label>
-                <Controller
-                  id="name"
-                  name="name"
-                  control={control}
-                  rules={{ required: "Name is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="text"
-                      placeholder="Full name"
-                      {...field}
-                      name="name"
-                    />
+                  <Label className="form-label" for="name">
+                    Name<span style={{ color: "red" }}>*</span>
+                  </Label>
+                  <Controller
+                    id="name"
+                    name="name"
+                    control={control}
+                    rules={{ required: "Name is required" }}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder="Full name"
+                        {...field}
+                        name="name"
+                      />
+                    )}
+                  />
+                  {errors?.name && (
+                    <FormFeedback>{errors?.name?.message}</FormFeedback>
                   )}
-                />
-                {errors?.name && (
-                  <FormFeedback>{errors?.name?.message}</FormFeedback>
-                )}
                 </Col>
                 <Col md="12" className="mb-1">
                   <Label className="form-label" for="email">
@@ -307,145 +363,153 @@ function ClientForm() {
                   )}
                 </Col>
                 <Row>
-                <Col md="8" sm="12" className="mb-1">
-                <Label className="form-label" for="clientphone">
-                  Phone number
-                </Label>
-                <Controller
-                  id="clientphone"
-                  name="clientphone"
-                  control={control}
-                  // rules={{ required: "Phone Number is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="number"
-                      placeholder="Phone Number"
-                      {...field}
+                  <Col md="8" sm="12" className="mb-1">
+                    <Label className="form-label" for="clientphone">
+                      Phone number
+                    </Label>
+                    <Controller
+                      id="clientphone"
+                      name="clientphone"
+                      control={control}
+                      rules={{ required: "Phone Number is required" }}
+                      render={({ field }) => (
+                        <Input
+                          type="number"
+                          placeholder="Phone Number"
+                          {...field}
+                        />
+                      )}
                     />
-                  )}
-                />
-                {errors?.clientphone && (
-                  <FormFeedback>{errors?.clientphone?.message}</FormFeedback>
-                )}
-                </Col>
-                <Col md="4" className="mb-1">
-                <Label className="form-label" for="clientphone">
-                  EXT
-                </Label>
-                <Controller
-                  id="clientEXT"
-                  name="clientEXT"
-                  control={control}
-                  // rules={{ required: "Phone Number is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="number"
-                      placeholder="Phone Number"
-                      {...field}
+                    {errors?.clientphone && (
+                      <FormFeedback>
+                        {errors?.clientphone?.message}
+                      </FormFeedback>
+                    )}
+                  </Col>
+                  <Col md="4" className="mb-1">
+                    <Label className="form-label" for="clientphone">
+                      EXT
+                    </Label>
+                    <Controller
+                      id="clientEXT"
+                      name="clientEXT"
+                      control={control}
+                      // rules={{ required: "Phone Number is required" }}
+                      render={({ field }) => (
+                        <Input
+                          type="number"
+                          placeholder="Phone Number"
+                          {...field}
+                        />
+                      )}
                     />
-                  )}
-                />
-                {errors?.clientEXT && (
-                  <FormFeedback>{errors?.clientEXT?.message}</FormFeedback>
-                )}
-                </Col>
+                    {errors?.clientEXT && (
+                      <FormFeedback>{errors?.clientEXT?.message}</FormFeedback>
+                    )}
+                  </Col>
                 </Row>
                 <Row>
-                <Col md="8" sm="12" className="mb-1">
-                <Label className="form-label" for="Altclientphone">
-                  Alt number
-                </Label>
-                <Controller
-                  id="altClientphone"
-                  name="altClientphone"
-                  control={control}
-                  // rules={{ required: "Phone Number is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="number"
-                      placeholder="Phone Number"
-                      {...field}
+                  <Col md="8" sm="12" className="mb-1">
+                    <Label className="form-label" for="Altclientphone">
+                      Alt number
+                    </Label>
+                    <Controller
+                      id="altClientphone"
+                      name="altClientphone"
+                      control={control}
+                      // rules={{ required: "Phone Number is required" }}
+                      render={({ field }) => (
+                        <Input
+                          type="number"
+                          placeholder="Phone Number"
+                          {...field}
+                        />
+                      )}
                     />
-                  )}
-                />
-                {errors?.altClientphone && (
-                  <FormFeedback>{errors?.altClientphone?.message}</FormFeedback>
-                )}
-                </Col>
-                <Col md="4" className="mb-1">
-                <Label className="form-label" for="altClientEXT">
-                  EXT
-                </Label>
-                <Controller
-                  id="altClientEXT"
-                  name="altClientEXT"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      type="number"
-                      placeholder="Phone Number"
-                      {...field}
+                    {errors?.altClientphone && (
+                      <FormFeedback>
+                        {errors?.altClientphone?.message}
+                      </FormFeedback>
+                    )}
+                  </Col>
+                  <Col md="4" className="mb-1">
+                    <Label className="form-label" for="altClientEXT">
+                      EXT
+                    </Label>
+                    <Controller
+                      id="altClientEXT"
+                      name="altClientEXT"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          type="number"
+                          placeholder="Phone Number"
+                          {...field}
+                        />
+                      )}
                     />
-                  )}
-                />
-                {errors?.altClientEXT && (
-                  <FormFeedback>{errors?.altClientEXT?.message}</FormFeedback>
-                )}
-                </Col>
+                    {errors?.altClientEXT && (
+                      <FormFeedback>
+                        {errors?.altClientEXT?.message}
+                      </FormFeedback>
+                    )}
+                  </Col>
                 </Row>
                 <Col md="12" sm="12" className="mb-1">
-                <Label className="form-label" for="faxNumber">
-                  Fax Numnber
-                </Label>
-                <Controller
-                  id="faxNumber"
-                  name="faxNumber"
-                  control={control}
-                  // rules={{ required: "Fax number is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="faxNumber"
-                      placeholder="Fax Number"
-                      {...field}
-                      name="faxNumber"
-                    />
+                  <Label className="form-label" for="faxNumber">
+                    Fax Numnber
+                  </Label>
+                  <Controller
+                    id="faxNumber"
+                    name="faxNumber"
+                    control={control}
+                    // rules={{ required: "Fax number is required" }}
+                    render={({ field }) => (
+                      <Input
+                        type="faxNumber"
+                        placeholder="Fax Number"
+                        {...field}
+                        name="faxNumber"
+                      />
+                    )}
+                  />
+                  {errors?.faxnumber && (
+                    <FormFeedback>{errors?.faxnumber?.message}</FormFeedback>
                   )}
-                />
-                {errors?.faxnumber && (
-                  <FormFeedback>{errors?.faxnumber?.message}</FormFeedback>
-                )}
                 </Col>
                 <Col md="12" sm="12" className="mb-1">
-                <Label className="form-label" for="finstruction">
-                  Fax Instruction
-                </Label>
-                <Controller
-                  id="faxInstruction"
-                  name="faxInstruction"
-                  control={control}
-                  // rules={{ required: "Fax Instruction is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="text"
-                      placeholder="Fax Instruction"
-                      {...field}
-                    />
+                  <Label className="form-label" for="finstruction">
+                    Fax Instruction
+                  </Label>
+                  <Controller
+                    id="faxInstruction"
+                    name="faxInstruction"
+                    control={control}
+                    // rules={{ required: "Fax Instruction is required" }}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder="Fax Instruction"
+                        {...field}
+                      />
+                    )}
+                  />
+                  {errors?.faxInstruction && (
+                    <FormFeedback>
+                      {errors?.faxInstruction?.message}
+                    </FormFeedback>
                   )}
-                />
-                {errors?.faxInstruction && (
-                  <FormFeedback>{errors?.faxInstruction?.message}</FormFeedback>
-                )}
                 </Col>
               </Col>
               {/*  contact information end*/}
             </Row>
-              <hr
-                style={{
-                  height: "1px",
-                  backgroundColor: "#000",
-                  border: "none",
-                }}
-              ></hr>
+            <hr
+              style={{
+                height: "1px",
+                backgroundColor: "#000",
+                border: "none",
+              }}
+            ></hr>
             <Row>
               <div className="h4 mb-2">Owner</div>
               <Col md="6" className="mb-1">
@@ -522,7 +586,7 @@ function ClientForm() {
                   // rules={{ required: "Owner Email is required" }}
                   render={({ field }) => (
                     <Input
-                      type="owneremail"
+                      type="email"
                       placeholder="owneremail"
                       {...field}
                       name="owneremail"
@@ -535,11 +599,11 @@ function ClientForm() {
               </Col>
             </Row>
             <hr
-                style={{
-                  height: "1px",
-                  backgroundColor: "#000",
-                  border: "none",
-                }}
+              style={{
+                height: "1px",
+                backgroundColor: "#000",
+                border: "none",
+              }}
             />
             <Row>
               <div className="h4 mb-2">Account Status</div>
@@ -584,111 +648,115 @@ function ClientForm() {
                   Disabled
                 </Label>
               </Col>
-            <Row>
-              <Col md="6" className="mb-1">
-                <Label className="form-label" for="dmessage">
-                  <h5>Disabled Message</h5>
-                </Label>
-                <h6>
-                  Disabled Message will be displayed to the Client when they
-                  attempt to login to the application
-                </h6>
-                <Controller
-                  id="disabledMessage"
-                  name="disabledMessage"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      type="text"
-                      placeholder="Disabled Message"
-                      {...field}
-                    />
+              <Row>
+                <Col md="6" className="mb-1">
+                  <Label className="form-label" for="dmessage">
+                    <h5>Disabled Message</h5>
+                  </Label>
+                  <h6>
+                    Disabled Message will be displayed to the Client when they
+                    attempt to login to the application
+                  </h6>
+                  <Controller
+                    id="disabledMessage"
+                    name="disabledMessage"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder="Disabled Message"
+                        {...field}
+                      />
+                    )}
+                  />
+                  {errors?.disabledMessage && (
+                    <FormFeedback>
+                      {errors?.disabledMessage?.message}
+                    </FormFeedback>
                   )}
-                />
-                {errors?.disabledMessage && (
-                  <FormFeedback>{errors?.disabledMessage?.message}</FormFeedback>
-                )}
-              </Col>
+                </Col>
 
-              <Col md="6" className="mb-1">
-                <Label className="form-label" for="dreason">
-                  <h5>Disabled Reason</h5>
-                </Label>
-                <h6>
-                  Any notes entered here are for internal use only and will not
-                  be seen by this client
-                </h6>
-                <Controller
-                  id="disabledReason"
-                  name="disabledReason"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      type="text"
-                      placeholder="Disabled Reason"
-                      {...field}
-                    />
+                <Col md="6" className="mb-1">
+                  <Label className="form-label" for="dreason">
+                    <h5>Disabled Reason</h5>
+                  </Label>
+                  <h6>
+                    Any notes entered here are for internal use only and will
+                    not be seen by this client
+                  </h6>
+                  <Controller
+                    id="disabledReason"
+                    name="disabledReason"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder="Disabled Reason"
+                        {...field}
+                      />
+                    )}
+                  />
+                  {errors?.disabledReason && (
+                    <FormFeedback>
+                      {errors?.disabledReason?.message}
+                    </FormFeedback>
                   )}
-                />
-                {errors?.disabledReason && (
-                  <FormFeedback>{errors?.disabledReason?.message}</FormFeedback>
-                )}
-              </Col>
+                </Col>
+              </Row>
             </Row>
-            </Row>
-              <hr
-                style={{
-                  height: "1px",
-                  backgroundColor: "#000",
-                  border: "none",
-                }}
-              />
-              <Row className="client-address">
-                <Col md="6">
-                  <div className="h4 mb-2">Physical Address</div>
-                  <Col md="12" className="mb-1">
-                    <Label className="form-label" for="staddress">
-                      Street Address<span style={{ color: "red" }}>*</span>
-                    </Label>
-                    <Controller
-                      id="physical_address.street"
-                      name="physical_address.street"
-                      control={control}
-                      rules={{ required: "Street Address is required" }}
-                      render={({ field }) => (
-                        <Input
-                          type="text"
-                          placeholder="Enter a location"
-                          {...field}
-                        />
-                      )}
-                    />
-                    {errors?.physical_address?.street && (
-                      <FormFeedback>{errors?.physical_address?.street?.message}</FormFeedback>
+            <hr
+              style={{
+                height: "1px",
+                backgroundColor: "#000",
+                border: "none",
+              }}
+            />
+            <Row className="client-address">
+              <Col md="6">
+                <div className="h4 mb-2">Physical Address</div>
+                <Col md="12" className="mb-1">
+                  <Label className="form-label" for="staddress">
+                    Street Address<span style={{ color: "red" }}>*</span>
+                  </Label>
+                  <Controller
+                    id="physical_address.street"
+                    name="physical_address.street"
+                    control={control}
+                    rules={{ required: "Street Address is required" }}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder="Enter a location"
+                        {...field}
+                      />
                     )}
-                  </Col>
-                  <Col md="12" className="mb-1">
-                    <Label className="form-label" for="addline2">
-                      AddressLine 2 (optional)
-                    </Label>
-                    <Controller
-                      id="physical_address.addressLine2"
-                      name="physical_address.addressLine2"
-                      control={control}
-                      // rules={{ required: "Name is required" }}
-                      render={({ field }) => (
-                        <Input
-                          type="text"
-                          placeholder=""
-                          {...field}
-                        />
-                      )}
-                    />
-                    {errors?.physical_address?.addressLine2 && (
-                      <FormFeedback>{errors?.physical_address?.addressLine2?.message}</FormFeedback>
+                  />
+                  {errors?.physical_address?.street && (
+                    <FormFeedback>
+                      {errors?.physical_address?.street?.message}
+                    </FormFeedback>
+                  )}
+                </Col>
+                <Col md="12" className="mb-1">
+                  <Label className="form-label" for="addline2">
+                    AddressLine 2 (optional)
+                  </Label>
+                  <Controller
+                    id="physical_address.addressLine2"
+                    name="physical_address.addressLine2"
+                    control={control}
+                    // rules={{ required: "Name is required" }}
+                    render={({ field }) => (
+                      <Input type="text" placeholder="" {...field} />
                     )}
-                  </Col>
-                  <Row>
+                  />
+                  {errors?.physical_address?.addressLine2 && (
+                    <FormFeedback>
+                      {errors?.physical_address?.addressLine2?.message}
+                    </FormFeedback>
+                  )}
+                </Col>
+                <Row>
                   <Col md="4" className="mb-1">
                     <Label className="form-label" for="zip">
                       Zip<span style={{ color: "red" }}>*</span>
@@ -699,15 +767,13 @@ function ClientForm() {
                       control={control}
                       rules={{ required: "Zip is required" }}
                       render={({ field }) => (
-                        <Input
-                          type="text"
-                          placeholder=""
-                          {...field}
-                        />
+                        <Input type="text" placeholder="" {...field} />
                       )}
                     />
                     {errors?.physical_address?.zip && (
-                      <FormFeedback>{errors?.physical_address?.zip?.message}</FormFeedback>
+                      <FormFeedback>
+                        {errors?.physical_address?.zip?.message}
+                      </FormFeedback>
                     )}
                   </Col>
                   <Col md="4" className="mb-1">
@@ -720,15 +786,13 @@ function ClientForm() {
                       control={control}
                       rules={{ required: "City is required" }}
                       render={({ field }) => (
-                        <Input
-                          type="text"
-                          placeholder=""
-                          {...field}
-                        />
+                        <Input type="text" placeholder="" {...field} />
                       )}
                     />
                     {errors?.physical_address?.city && (
-                      <FormFeedback>{errors?.physical_address?.city?.message}</FormFeedback>
+                      <FormFeedback>
+                        {errors?.physical_address?.city?.message}
+                      </FormFeedback>
                     )}
                   </Col>
                   <Col md="4" className="mb-1">
@@ -750,86 +814,97 @@ function ClientForm() {
                       )}
                     />
                     {errors?.physical_address?.state && (
-                      <FormFeedback>{errors?.physical_address?.state?.message}</FormFeedback>
+                      <FormFeedback>
+                        {errors?.physical_address?.state?.message}
+                      </FormFeedback>
                     )}
                   </Col>
-                  </Row>
-                  <Col md="6" className="mb-1">
-                    <Label className="form-label" for="country">
-                      Country
-                    </Label>
-                    <Controller
-                      id="physical_address.country"
-                      name="physical_address.country"
-                      control={control}
-                      render={({ field }) => (
-                        <Input type="select" {...field} name="country">
-                          <option value="">Select Country</option>
-                          {countries.map((country) => (
-                            <option key={country.code} value={country.code}>
-                              {country.name}
-                            </option>
-                          ))}
-                        </Input>
-                      )}
-                    />
-                    {errors?.physical_address?.country && (
-                      <FormFeedback>{errors?.physical_address?.country?.message}</FormFeedback>
+                </Row>
+                <Col md="6" className="mb-1">
+                  <Label className="form-label" for="country">
+                    Country
+                  </Label>
+                  <Controller
+                    id="physical_address.country"
+                    name="physical_address.country"
+                    control={control}
+                    render={({ field }) => (
+                      <Input type="select" {...field} name="country">
+                        <option value="">Select Country</option>
+                        {countries.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </Input>
                     )}
-                  </Col>
+                  />
+                  {errors?.physical_address?.country && (
+                    <FormFeedback>
+                      {errors?.physical_address?.country?.message}
+                    </FormFeedback>
+                  )}
                 </Col>
-                <Col md="6">
+              </Col>
+              <Col md="6">
                 <div className="h4 mb-2">Billing Address</div>
-                    <Col md="12">
-                      <FormGroup check inline>
-                        <Input type="checkbox" onClick={(e) => handleSameAsPhysical(e)}/>
-                        <Label check>Same as Physical address</Label>
-                      </FormGroup>
-                    </Col>
-                  <Col md="12" className="mb-1">
-                    <Label className="form-label" for="staddress">
-                      Street Address<span style={{ color: "red" }}>*</span>
-                    </Label>
-                    <Controller
-                      id="billing_address.street"
-                      name="billing_address.street"
-                      control={control}
-                      rules={{ required: "Street Address is required" }}
-                      render={({ field }) => (
-                        <Input
-                          type="text"
-                          placeholder="Enter a location"
-                          disabled={adressCheck}
-                          {...field}
-                        />
-                      )}
+                <Col md="12">
+                  <FormGroup check inline>
+                    <Input
+                      type="checkbox"
+                      onClick={(e) => handleSameAsPhysical(e)}
                     />
-                    {errors?.billing_address?.street && (
-                      <FormFeedback>{errors?.billing_address?.street?.message}</FormFeedback>
+                    <Label check>Same as Physical address</Label>
+                  </FormGroup>
+                </Col>
+                <Col md="12" className="mb-1">
+                  <Label className="form-label" for="staddress">
+                    Street Address<span style={{ color: "red" }}>*</span>
+                  </Label>
+                  <Controller
+                    id="billing_address.street"
+                    name="billing_address.street"
+                    control={control}
+                    rules={{ required: "Street Address is required" }}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder="Enter a location"
+                        disabled={adressCheck}
+                        {...field}
+                      />
                     )}
-                  </Col>
-                  <Col md="12" className="mb-1">
-                    <Label className="form-label" for="addline2">
-                      AddressLine 2 (optional)
-                    </Label>
-                    <Controller
-                      id="billing_address.addressLine2"
-                      name="billing_address.addressLine2"
-                      control={control}
-                      // rules={{ required: "Name is required" }}
-                      render={({ field }) => (
-                        <Input
-                          type="text"
-                          placeholder=""
-                          disabled={adressCheck}
-                          {...field}
-                        />
-                      )}
-                    />
-                    {errors?.billing_address?.addressLine2 && (
-                      <FormFeedback>{errors?.billing_address?.addressLine2?.message}</FormFeedback>
+                  />
+                  {errors?.billing_address?.street && (
+                    <FormFeedback>
+                      {errors?.billing_address?.street?.message}
+                    </FormFeedback>
+                  )}
+                </Col>
+                <Col md="12" className="mb-1">
+                  <Label className="form-label" for="addline2">
+                    AddressLine 2 (optional)
+                  </Label>
+                  <Controller
+                    id="billing_address.addressLine2"
+                    name="billing_address.addressLine2"
+                    control={control}
+                    // rules={{ required: "Name is required" }}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder=""
+                        disabled={adressCheck}
+                        {...field}
+                      />
                     )}
-                  </Col>
+                  />
+                  {errors?.billing_address?.addressLine2 && (
+                    <FormFeedback>
+                      {errors?.billing_address?.addressLine2?.message}
+                    </FormFeedback>
+                  )}
+                </Col>
                 <Row>
                   <Col md="4" className="mb-1">
                     <Label className="form-label" for="zip">
@@ -850,7 +925,9 @@ function ClientForm() {
                       )}
                     />
                     {errors?.billing_address?.zip && (
-                      <FormFeedback>{errors?.billing_address?.zip?.message}</FormFeedback>
+                      <FormFeedback>
+                        {errors?.billing_address?.zip?.message}
+                      </FormFeedback>
                     )}
                   </Col>
                   <Col md="4" className="mb-1">
@@ -872,7 +949,9 @@ function ClientForm() {
                       )}
                     />
                     {errors?.billing_address?.city && (
-                      <FormFeedback>{errors?.billing_address?.city?.message}</FormFeedback>
+                      <FormFeedback>
+                        {errors?.billing_address?.city?.message}
+                      </FormFeedback>
                     )}
                   </Col>
                   <Col md="4" className="mb-1">
@@ -894,113 +973,118 @@ function ClientForm() {
                       )}
                     />
                     {errors?.billing_address?.state && (
-                      <FormFeedback>{errors?.billing_address?.state?.message}</FormFeedback>
+                      <FormFeedback>
+                        {errors?.billing_address?.state?.message}
+                      </FormFeedback>
                     )}
                   </Col>
                 </Row>
-                  <Col md="6" className="mb-1">
-                    <Label className="form-label" for="country">
-                      Country
-                    </Label>
-                    <Controller
-                      id="billing_address.country"
-                      name="billing_address.country"
-                      control={control}
-                      render={({ field }) => (
-                        <Input type="select" {...field} name="country"  disabled={adressCheck}>
-                          <option value="">Select Country</option>
-                          {countries.map((country) => (
-                            <option key={country.code} value={country.code}>
-                              {country.name}
-                            </option>
-                          ))}
-                        </Input>
-                      )}
-                    />
-                    {errors?.billing_address?.country && (
-                      <FormFeedback>{errors?.billing_address?.country?.message}</FormFeedback>
+                <Col md="6" className="mb-1">
+                  <Label className="form-label" for="country">
+                    Country
+                  </Label>
+                  <Controller
+                    id="billing_address.country"
+                    name="billing_address.country"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        type="select"
+                        {...field}
+                        name="country"
+                        disabled={adressCheck}
+                      >
+                        <option value="">Select Country</option>
+                        {countries.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </Input>
                     )}
-                  </Col>
-                <Col md="6" sm="12" className="mb-1">
-                <Label className="form-label" for="Altclientphone">
-                  Attn
-                </Label>
-                <Controller
-                  id="Altclientphone"
-                  name="Altclientphone"
-                  control={control}
-                  // rules={{ required: "Phone Number is required" }}
-                  render={({ field }) => (
-                    <Input
-                      type="number"
-                      placeholder=""
-                      {...field}
-                      name="Altclientphone"
-                    />
+                  />
+                  {errors?.billing_address?.country && (
+                    <FormFeedback>
+                      {errors?.billing_address?.country?.message}
+                    </FormFeedback>
                   )}
-                />
-                {errors?.Altclientphone && (
-                  <FormFeedback>{errors?.Altclientphone?.message}</FormFeedback>
-                )}
+                </Col>
+                <Col md="6" sm="12" className="mb-1">
+                  <Label className="form-label" for="attentionto">
+                    Attn
+                  </Label>
+                  <Controller
+                    id="attentionto"
+                    name="attentionto"
+                    control={control}
+                    // rules={{ required: "Phone Number is required" }}
+                    render={({ field }) => (
+                      <Input
+                        type="text"
+                        placeholder=""
+                        {...field}
+                        name="attentionto"
+                      />
+                    )}
+                  />
+                  {errors?.attentionto && (
+                    <FormFeedback>{errors?.attentionto?.message}</FormFeedback>
+                  )}
+                </Col>
               </Col>
-                
-              </Col>
-              </Row>
-              <div className="client-address">
-                
-              </div>
+            </Row>
+            <div className="client-address"></div>
             <hr
-                style={{
-                  height: "1px",
-                  backgroundColor: "#000",
-                  border: "none",
-                }}
+              style={{
+                height: "1px",
+                backgroundColor: "#000",
+                border: "none",
+              }}
             />
             <Row>
-            <Col md="6">
-              <div className="h4 mb-2">Product Selection Instructions</div>
-              <FormGroup check inline>
+              <Col md="6">
+                <div className="h4 mb-2">Product Selection Instructions</div>
+                <FormGroup check inline>
+                  <Controller
+                    id="displayProductSection"
+                    name="displayProductSection"
+                    control={control}
+                    render={({ field }) => (
+                      <Input type="checkbox"  {...field} onChange={handledisplay} />
+                    )}
+                  />
+                  {errors?.displayProductSection && (
+                    <FormFeedback>
+                      {errors?.displayProductSection?.message}
+                    </FormFeedback>
+                  )}
+                  <Label check>Display Product Selection Instruction</Label>
+                </FormGroup>
+              </Col>
+              <br></br>
+              <h5>Product Selection Instructions</h5>
+              <Col md="12" className="mb-1">
                 <Controller
-                  id="displayProductSection"
-                  name="displayProductSection"
+                  id="productSection"
+                  name="productSection"
                   control={control}
                   render={({ field }) => (
-                    <Input type="checkbox"
-                    defaultValue={false}
-                    {...field} 
-                    />  
+                    <Editor
+                      editorState={editorState}
+                      onEditorStateChange={(val) => setEditorState(val)}
+                      {...field}
+                      toolbar={{
+                        fontSize: {
+                          options: [8, 9, 10, 11, 12, 14, 16, 18, 24, 30, 35],
+                        },
+                      }}
+                    />
                   )}
                 />
-                {errors?.displayProductSection && (
-                  <FormFeedback>{errors?.displayProductSection?.message}</FormFeedback>
+                {errors?.productSection && (
+                  <FormFeedback>{errors?.productSection?.message}</FormFeedback>
                 )}
-                <Label check>Display Product Selection Instruction</Label>
-              </FormGroup>
-            </Col>
-            <br></br>
-            <h5>Product Selection Instructions</h5>
-            <Col md="12" className="mb-1">
-              <Controller
-                id="productSection"
-                name="productSection"
-                control={control}
-                render={({ field }) => (
-                  <Editor
-                    editorState={editorState}
-                    onEditorStateChange={(val) => setEditorState(val)}
-                    {...field}
-                    toolbar={{
-                      fontSize: {
-                        options: [8, 9, 10, 11, 12, 14, 16, 18, 24, 30, 35],
-                      },                      
-                    }}
-                  />
-                )}
-              />
-              {errors?.productSection && (
-                <FormFeedback>{errors?.productSection?.message}</FormFeedback>
-              )}
-            </Col>
+              </Col>
             </Row>
             <hr
               style={{
@@ -1010,53 +1094,57 @@ function ClientForm() {
               }}
             />
             <Row>
-            <br></br>
-            <Col md='6' >
-              <h4>Product Selection Instructions</h4>
-              <h5>Preferred URI</h5>
-              <p>The data </p>
-              <Controller
-                id="affiliated"
-                name="affiliated"
-                control={control}
-                render={({ field }) => (
-                  <Typeahead
+              <br></br>
+              <Col md="6">
+                <h4>Affiliated Site Information</h4>
+                <h5>Preferred URI</h5>
+                <p>The data </p>
+                <Controller
+                  id="affiliated"
+                  name="affiliated"
+                  control={control}
+                  render={({ field }) => (
+                    <Typeahead
                       allowNew={false}
                       id="custom-selections-example"
                       labelKey={"label"}
-                      options={Affiliated && Array.isArray(Affiliated) &&
-                        Affiliated?.length > 0 ? Affiliated :
-                        []}
+                      options={
+                        Affiliated &&
+                        Array.isArray(Affiliated) &&
+                        Affiliated?.length > 0
+                          ? Affiliated
+                          : []
+                      }
                       placeholder="Search tags..."
                       {...field}
-                  />
-                )}
-              />
-              {errors?.affiliated && (
-                <FormFeedback>{errors?.affiliated?.message}</FormFeedback>
-              )}
-            </Col>
-            <Col md='6' >
-              <FormGroup check inline className="mt-3">
-              <Controller
-                id="invoice"
-                name="invoice"
-                control={control}
-                render={({ field }) => (
-                <Input type="checkbox"
-                defaultValue={false}
-                {...field} 
+                    />
+                  )}
                 />
-                  
+                {errors?.affiliated && (
+                  <FormFeedback>{errors?.affiliated?.message}</FormFeedback>
                 )}
-              />
-              {errors?.invoice && (
-                <FormFeedback>{errors?.invoice?.message}</FormFeedback>
-              )}
-              <Label check>Do Not Invoice</Label>
-              </FormGroup>
-              <p>If this is checked, the data associated with the Preferred URL will not be displayed in invoices. Instead, then CRA information will be displayed</p>
-            </Col>
+              </Col>
+              <Col md="6">
+                <FormGroup check inline className="mt-3">
+                  <Controller
+                    id="invoice"
+                    name="invoice"
+                    control={control}
+                    render={({ field }) => (
+                      <Input type="checkbox" defaultValue={false} {...field} />
+                    )}
+                  />
+                  {errors?.invoice && (
+                    <FormFeedback>{errors?.invoice?.message}</FormFeedback>
+                  )}
+                  <Label check>Do Not Invoice</Label>
+                </FormGroup>
+                <p>
+                  If this is checked, the data associated with the Preferred URL
+                  will not be displayed in invoices. Instead, then CRA
+                  information will be displayed
+                </p>
+              </Col>
             </Row>
             <Row>
               <Col md="12" className="d-flex justify-content-end">

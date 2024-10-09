@@ -102,7 +102,7 @@ function VendorForm() {
       };
     console.log("payload",payload);
       reqCreateVendor(payload);
-
+      
     };
 
 

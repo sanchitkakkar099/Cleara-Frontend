@@ -162,6 +162,68 @@ export const {
   useDeleteVendorMutation
 }  = vendorApi;
 
+/******* Users API  ******/ 
+
+export const clientUserApi = createApi({
+  tagTypes: ["clientuser"],
+  reducerPath: "clientuser",
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${baseUrl}/`,
+    prepareHeaders: (headers, { getState }) => {
+      if(getState()?.authState?.userToken){
+        headers.set('Authorization', getState()?.authState?.userToken);
+      }
+      return headers;
+    },
+  }),
+  endpoints: (builder) => ({
+    createClientUser : builder.mutation({
+      query:(payload) => ({
+        url:"clientuser",
+        method:"POST",
+        body:payload,
+      }),
+      providesTags:["clientuser"],
+    }),
+    clientUserList: builder.mutation({
+      query: (payload) => ({
+        url: "clientuser/list",
+        method: "POST",
+        body: payload,
+      }),
+      providesTags: ["clientuser"],
+    }),
+    clientUserById: builder.query({
+      query: (id) => ({
+        url: `clientuser/byid/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["clientuser"],
+    }),
+    clientUserDropdown: builder.query({
+      query: () => ({
+        url: "clientuser/dropdown",
+        method: "GET",
+      }),
+      providesTags: ["clientuser"],
+    }),
+    deleteClientUser: builder.mutation({
+      query: (id) => ({
+        url: `clientuser/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["clientuser"],
+    }),
+  })
+})
+
+export const {
+  useCreateClientUserMutation,
+  useClientUserListMutation,
+  useClientUserByIdQuery,
+  useClientUserDropdownQuery,
+  useDeleteClientUserMutation
+}  = clientUserApi;
 
 /******* Client API  ******/ 
 

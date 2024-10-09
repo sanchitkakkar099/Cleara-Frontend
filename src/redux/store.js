@@ -13,14 +13,15 @@ import approvalSlice from "./approvalSlice";
 /***  Cleara Dashboard API ***/
 import { 
    vendorApi,
-   clientApi
+   clientApi,
+   clientUserApi
     } from "../service";
 
     /*** Cleara imports ***/
 
 import vendorSlice from "./vendorSlice";   
 import clientSlice from "./clientSlice";
-
+import userSlice from "./userSlice";
 const appReducer = combineReducers({
   authState:authSlice,
   orderState:orderSlice,
@@ -29,7 +30,7 @@ const appReducer = combineReducers({
 
   vendorState: vendorSlice,
   clientState: clientSlice,
-
+  userState: userSlice,
 
   [authApi.reducerPath]: authApi.reducer,
   [ordersApi.reducerPath]:ordersApi.reducer,
@@ -41,6 +42,7 @@ const appReducer = combineReducers({
 
   [vendorApi.reducerPath]: vendorApi.reducer,
   [clientApi.reducerPath]:clientApi.reducer,
+  [clientUserApi.reducerPath]:clientUserApi.reducer
 });
 
 export const store = configureStore({
@@ -55,6 +57,7 @@ export const store = configureStore({
       /***** Cleara Middleware *****/
 
       vendorApi.middleware,
-      clientApi.middleware
-    ]),
+      clientApi.middleware,
+      clientUserApi.middleware,
+    ])
 });

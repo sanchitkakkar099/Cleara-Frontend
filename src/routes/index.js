@@ -11,6 +11,10 @@ import ClientForm from "../components/clients/ClientForm";
 import VendorList from "../components/vendors/VendorList";
 import VendorForm from "../components/vendors/VendorForm";
 
+import UserList from "../components/users/UserList";
+import UserForm from "../components/users/UserForm";
+import UserPermission from "../components/users/UserPermission";
+
 
 const OrderList = lazy(() => import("../components/order/Orderlist"));
 const ApprovalForm = lazy(() => import("../components/appApproval/ApprovalForm"));
@@ -27,7 +31,11 @@ export const privateRoutes = [
   {path:"/vendor-form",Component:VendorForm},
 
   {path:"/client-list",Component:ClientList},
-  {path: "client-form",Component:ClientForm}
+  {path: "/client-form",Component:ClientForm},
+
+  {path:"/user-list",Component:UserList},
+  {path:"/user-form",Component:UserForm},
+  {path:"user-permission",Component:UserPermission}
 ];
 
 
